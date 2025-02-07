@@ -69,7 +69,6 @@ def history_gen(img, prompt, metadata=None):
             tmp = prompt[i]['question']
         history.append({"role": "user", "parts": [img[i], tmp]})
         history.append({"role": "model", "parts": prompt[i]['answer']})
-        print(tmp)
     return history
 
 def resize_image(img, max_size = 3000):
@@ -90,6 +89,7 @@ def resize_image(img, max_size = 3000):
 
         # 이미지 리사이즈
         img = img.resize((new_width, new_height), PIL.Image.Resampling.LANCZOS)
+        
 
     return img
 
