@@ -2,6 +2,7 @@ import google.generativeai as genai
 import os
 import PIL.Image
 import json
+import requests
 
 base_prompt = "메타데이터는 다음과 같습니다:"
 
@@ -57,7 +58,9 @@ def history_gen(img, prompt, metadata=None):
             try:
                 with open(f'{path}{i}.json', 'r', encoding='utf-8') as f:
                     meta_json = json.load(f)
+                    meta_json = metadata_preprocess(meta_json)
                     meta_json = json.dumps(meta_json, ensure_ascii=False)
+                    
                     meta_prompt = base_prompt + meta_json
             except FileNotFoundError:
                 meta_prompt = ''
@@ -90,6 +93,40 @@ def resize_image(img, max_size = 3000):
 
     return img
 
+def metadata_preprocess(metadata):
+    with open('./env/key.json') as f:
+        auth_key = json.load(f)
+        opencage_key = auth_key['opencage']
+    
+    
+    #2x4
+    lonlat = metadata['geometry']['coordinates'][0]
+    lon, lat = 0, 0
+    for i in range(4):
+        lon += lonlat[i][0]
+        lat += lonlat[i][1]
+    lon /= 4
+    lat /= 4
+
+    url = "https://api.opencagedata.com/geocode/v1/json"
+    params = {
+        "q": f"{lat},{lon}",
+        "key": opencage_key,
+        "language": "ko"  # 한국어 설정
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    city, country = None, None
+    if response.status_code == 200 and data["results"]:
+        components = data["results"][0]["components"]
+        city = components.get("city", components.get("town", components.get("village", "알 수 없는 도시")))
+        country = components.get("country", "알 수 없는 국가")
+    
+    metadata['city'] = city
+    metadata['country'] = country
+    return metadata
 
 #if main
 if __name__ == "__main__":
@@ -135,6 +172,7 @@ if __name__ == "__main__":
     try:
         with open(input_img[:-3] + 'json', 'r', encoding='utf-8') as f:
             meta_json = json.load(f)
+            meta_json = metadata_preprocess(meta_json)
             meta_json = json.dumps(meta_json, ensure_ascii=False)
             meta_prompt = base_prompt + meta_json
     except FileNotFoundError:
