@@ -30,7 +30,7 @@ class ChatModel:
                                                     2. 식별(identify): 이미지에서 특정 객체를 인식.
                                                     3. 객체 탐지(object detection): 이미지 내 객체를 박스로 표시하고 해당 위치를 출력.
                                                     4. 분류(classify): 사진 속 객체를 분류.
-                                                    이 외에도 입력 이미지에 따라 다른 작업이 요구될 수 있으며, 모든 결과는 반드시 한국어로 출력되어야 합니다.
+                                                    이 외에도 입력 이미지에 따라 다른 작업이 요구될 수 있습니다.
                                                     이미지를 분석할 때 주변의 환경과 색상을 구분하여 생각한 뒤, 결과를 출력해주세요.
                                                     만약, 산과 숲 처럼 다양한 대답이 가능한 경우, 삼림과 같이 모두를 포함하는 하나의 확실한 대답을 제시해주세요.
                                                     이미지나 사진과 같은 단어는 지양하고, 대신 '이 지역' 혹은 '이 곳'과 같은 장소를 나타내는 표현을 사용해주세요.
@@ -51,7 +51,7 @@ class ChatModel:
         self.response = self.chat.send_message([f, message])
         return self.response.text
 
-def history_gen(img, prompt, metadata=None):
+def history_gen(img, prompt, len, metadata=None):
     history = []
     for i in range(len):
         if(metadata is not None):
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
 
     chat = ChatModel()
-    chat.start_chat(history=history_gen(img, prompt, metadata))
+    chat.start_chat(history=history_gen(img, prompt, len, metadata))
 
     #get input message
     input_message = input("Qustion: ")
