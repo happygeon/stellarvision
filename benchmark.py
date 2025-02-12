@@ -1,4 +1,5 @@
 import gemini_prompt
+import gpt_prompt
 import os
 import json
 from pycocoevalcap.cider.cider import Cider
@@ -49,7 +50,7 @@ def preprocess(sentence):
 def test_gemini_fewshot(dataset, shot):
     res = {}
     gts = {}
-    for data in dataset:
+    for data in dataset[:10]:
         file_name = data['filename']
         sentences = data['sentences']
         sentences = [x['raw'] for x in sentences]
@@ -87,7 +88,8 @@ def test_gemini_fewshot(dataset, shot):
         input_img = gemini_prompt.resize_image(PIL.Image.open(input_img))
 
         response = chat.send_message(input_message, input_img, input_img_path) 
-        print(response)
+        print("응답: ", response)
+        print("예시: ", gts[file_name][0])
         res[file_name] = [response]
 
 

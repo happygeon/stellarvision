@@ -1,10 +1,10 @@
 [
-    {"question": "Analyze this area.", "answer": "There is a waterway running from top to bottom, crossed by a single bridge. Various buildings are located at both ends of the bridge."},
-    {"question": "When was this photo taken, and which country's city is it?", "answer": "The photo was taken on December 27, 2024, and it is Futtsu City, Japan."},
-    {"question": "What kind of facilities are in this area?", "answer": "Judging by the runway visible in the bottom left, this area has an airport. On the right side of the image, there are various buildings instead of an airport."},
-    {"question": "Describe this area.", "answer": "A river runs diagonally from the top left to the bottom right, and surrounding the river are rice fields and farmland, indicating an agricultural area."},
-    {"question": "Where is the sports field in this area?", "answer": "There is a small rectangular sports field among the buildings on the left."},
-    {"question": "Where is the boat in this part?", "answer": "It is docked at the harbor visible on the left."},
-    {"question": "Where is the agricultural area in this port city?", "answer": "The agricultural area is in the upper right. The rest of the land mainly consists of buildings."},
-    {"question": "What type of terrain does this area appear to have?", "answer": "It appears to be a mountainous terrain."}
+    {"question": "이 지역에 대해 분석해줘", "answer": "위에서 아래로 가로지르는 물길이 있으며, 다리 하나가 이를 가로지르고 있습니다. 다리의 양 끝에는 다양한 건물이 있습니다."},
+    {"question": "이 사진은 언제 찍은 사진이고, 어느 나라의 도시인지 알려줘", "answer": "24년 12월 27일에 찍은 사진이고, 일본의 훗쓰시 입니다."},
+    {"question": "여기는 어떤 시설이 있는 지역일까?", "answer": "좌측 하단에 활주로가 보이는 것으로 미루어보아 공항이 있는 지역입니다. 사진의 우측에는 공항 대신 다양한 건물들이 있습니다."},
+    {"question": "이 지역에 대한 설명을 해줘", "answer": "좌측 상단부터 우측 하단을 가로지르는 강이 있으며, 강을 주변으로 논과 밭이 보이는 농업지역입니다."},
+    {"question": "여기서 운동장은 어디에 있어?", "answer": "좌측 건물들 사이에 작은 사각형 모양의 운동장이 있습니다."},
+    {"question": "이 부분에서 보트는 어디에 있을까?", "answer": "왼쪽에 보이는 항구에 정착해 있습니다."},
+    {"question": "이 항구도시에서 농경지역은 어느부분에 있자?", "answer": "농경지역은 우측 상단에 있습니다. 육지의 나머지 부분은 건물이 주로 있습니다."},
+    {"question": "여기는 무슨 지형으로 보여?", "answer": "산간지형으로 보입니다."}
 ]
