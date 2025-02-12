@@ -6,7 +6,10 @@ import google.generativeai as genai
 import PIL.Image
 import deepl
 from konlpy.tag import Komoran
+import openai
+import base64
 komoran = Komoran()
+
 def get_rsicd(only_port):
     if(only_port):
         with open('./RSICD/txtclasses_rsicd/Port.txt') as f:
@@ -39,12 +42,66 @@ def translate(string):
     result = translator.translate_text(string, target_lang="KO")
     return result.text
 
-
 def preprocess(sentence):
     # 문장이 리스트가 아닌, 문자열로 처리되도록 해야 한다.
     return komoran.morphs(sentence)
 
 def test_gemini_fewshot(dataset, shot):
+    res = {}
+    gts = {}
+    for data in dataset:
+        file_name = data['filename']
+        sentences = data['sentences']
+        sentences = [x['raw'] for x in sentences]
+        sentences = [translate(x) for x in sentences]
+        gts[file_name] = sentences
+
+        len = shot
+        path = './dataset/'
+        metadata = None
+
+        with open('./env/key.json') as f:
+            auth_key = json.load(f)
+            genai.configure(api_key=auth_key['gemini'])
+
+        #get image and prompt
+        img = gemini_prompt.img_gen(len, path)
+        with open('./dataset/prompt.json', 'r', encoding='utf-8') as f:
+            prompt = json.load(f)
+            try:
+                if not isinstance(prompt, list):
+                    raise TypeError
+            except TypeError:
+                print("prompt should be list type")
+                exit()
+
+
+        chat = gemini_prompt.ChatModel()
+        chat.start_chat(history=gemini_prompt.history_gen(img, prompt, len, metadata))
+
+        #get input message
+        input_message = "이 사진에 대해 캡션을 달아줘"
+        input_img = './RSICD/RSICD_images/' + file_name
+        
+        input_img_path = input_img
+        input_img = gemini_prompt.resize_image(PIL.Image.open(input_img))
+
+        response = chat.send_message(input_message, input_img, input_img_path) 
+        print(response)
+        res[file_name] = [response]
+
+
+    gts = {key: [preprocess(caption) for caption in value] for key, value in gts.items()}
+    res = {key: [preprocess(caption) for caption in value] for key, value in res.items()}
+    gts = {k: [" ".join(sent) for sent in v] for k, v in gts.items()}
+    res = {k: [" ".join(sent) for sent in v] for k, v in res.items()}
+    cider_scorer = Cider()
+    score, x = cider_scorer.compute_score(gts, res)
+    print(score)
+    print(x)
+    return score
+
+def test_gpt_fewshot(dataset, shot):
     res = {}
     gts = {}
     for data in dataset:
@@ -119,5 +176,10 @@ if __name__ == "__main__":
             model_output = test_gemini_fewshot(dataset, 4)
         if test_type == 'zeroshot':
             model_output = test_gemini_fewshot(dataset, 0)
+    if model == 'gpt':
+        if test_type == 'fewshot':
+            model_output = test_gpt_fewshot(dataset, 4)
+        if test_type == 'zeroshot':
+            model_output = test_gpt_fewshot(dataset, 0)
     
     print("Cider Score: ", model_output)
