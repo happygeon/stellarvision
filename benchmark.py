@@ -106,7 +106,7 @@ def test_gemini_fewshot(dataset, shot):
 def test_gpt_fewshot(dataset, shot):
     res = {}
     gts = {}
-    for data in dataset:
+    for data in dataset[:10]:
         file_name = data['filename']
         sentences = data['sentences']
         sentences = [x['raw'] for x in sentences]
@@ -119,10 +119,11 @@ def test_gpt_fewshot(dataset, shot):
 
         with open('./env/key.json') as f:
             auth_key = json.load(f)
-            genai.configure(api_key=auth_key['gemini'])
+            openai.api_key = auth_key['gpt']
 
         #get image and prompt
         img = gemini_prompt.img_gen(len, path)
+        img = gpt_prompt.img_64(img)
         with open('./dataset/prompt.json', 'r', encoding='utf-8') as f:
             prompt = json.load(f)
             try:
@@ -131,10 +132,10 @@ def test_gpt_fewshot(dataset, shot):
             except TypeError:
                 print("prompt should be list type")
                 exit()
+        
 
-
-        chat = gemini_prompt.ChatModel()
-        chat.start_chat(history=gemini_prompt.history_gen(img, prompt, len, metadata))
+        chat = gpt_prompt.ChatModel()
+        #chat.start_chat(history=gemini_prompt.history_gen(img, prompt, len, metadata))
 
         #get input message
         input_message = "이 사진에 대해 캡션을 달아줘"
@@ -143,8 +144,14 @@ def test_gpt_fewshot(dataset, shot):
         input_img_path = input_img
         input_img = gemini_prompt.resize_image(PIL.Image.open(input_img))
 
-        response = chat.send_message(input_message, input_img, input_img_path) 
-        print(response)
+        tmplist = []
+        tmplist.append(input_img)
+        input_img = gpt_prompt.img_64(tmplist)
+
+        response = chat.send_message(input_message, input_img, input_img_path, img, prompt, len)
+        
+        print("응답: ", response)
+        print("예시: ", gts[file_name][0])
         res[file_name] = [response]
 
 
