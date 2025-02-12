@@ -149,7 +149,7 @@ def test_gpt_fewshot(dataset, shot):
         input_img = gpt_prompt.img_64(tmplist)
 
         response = chat.send_message(input_message, input_img, input_img_path, img, prompt, len)
-        
+
         print("응답: ", response)
         print("예시: ", gts[file_name][0])
         res[file_name] = [response]
@@ -190,5 +190,7 @@ if __name__ == "__main__":
             model_output = test_gpt_fewshot(dataset, 4)
         if test_type == 'zeroshot':
             model_output = test_gpt_fewshot(dataset, 0)
+        # if test_type == 'fine-tune':
+        #     model_output = test_gpt_fine_tune(dataset)
     
     print("Cider Score: ", model_output)
