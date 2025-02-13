@@ -2,8 +2,8 @@ import openai
 import base64
 
 class ChatModel:
-    def __init__(self):
-        self.model_name = "gpt-4o-mini"
+    def __init__(self, model = "gpt-4o-mini", temperature = 0.4):
+        self.model_name = model
         self.temperature = 0.4
         self.messages = [{"role": "system", "content": """위성사진과 요청사항을 입력으로 제공하면 모델이 다양한 작업을 수행해야 합니다.
                                                     예를 들어:

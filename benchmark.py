@@ -103,7 +103,7 @@ def test_gemini_fewshot(dataset, shot):
     print(x)
     return score
 
-def test_gpt_fewshot(dataset, shot):
+def test_gpt_fewshot(dataset, shot, fine_tune=False):
     res = {}
     gts = {}
     for data in dataset[:10]:
@@ -116,6 +116,7 @@ def test_gpt_fewshot(dataset, shot):
         len = shot
         path = './dataset/'
         metadata = None
+        fine_tune_model = "ft:gpt-4o-2024-08-06:personal::B0KHkpXT"
 
         with open('./env/key.json') as f:
             auth_key = json.load(f)
@@ -133,8 +134,11 @@ def test_gpt_fewshot(dataset, shot):
                 print("prompt should be list type")
                 exit()
         
-
-        chat = gpt_prompt.ChatModel()
+        if fine_tune:
+            chat = gpt_prompt.ChatModel(model = fine_tune_model)
+        else:
+            chat = gpt_prompt.ChatModel()
+        
         #chat.start_chat(history=gemini_prompt.history_gen(img, prompt, len, metadata))
 
         #get input message
@@ -190,7 +194,7 @@ if __name__ == "__main__":
             model_output = test_gpt_fewshot(dataset, 4)
         if test_type == 'zeroshot':
             model_output = test_gpt_fewshot(dataset, 0)
-        # if test_type == 'fine-tune':
-        #     model_output = test_gpt_fine_tune(dataset)
+        if test_type == 'fine-tune':
+            model_output = test_gpt_fewshot(dataset, 0, fine_tune=True)
     
     print("Cider Score: ", model_output)
