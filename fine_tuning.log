@@ -1,6 +1,0 @@
-2025-02-13 10:05:08 - INFO - HTTP Request: POST https://api.openai.com/v1/files "HTTP/1.1 200 OK"
-2025-02-13 10:05:08 - INFO - Uploaded file ID: file-Dmp8hmfvSX368GYrG3gXAQ
-2025-02-13 10:05:10 - INFO - HTTP Request: POST https://api.openai.com/v1/fine_tuning/jobs "HTTP/1.1 200 OK"
-2025-02-13 10:05:10 - INFO - Fine-tuning job ID: ftjob-qlhGGbazFIbWYwMRsAJjuenU
-2025-02-13 10:05:10 - INFO - HTTP Request: GET https://api.openai.com/v1/fine_tuning/jobs/ftjob-qlhGGbazFIbWYwMRsAJjuenU "HTTP/1.1 200 OK"
-2025-02-13 10:05:10 - INFO - Fine-tuning status: validating_files
