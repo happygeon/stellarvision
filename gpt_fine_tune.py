@@ -43,9 +43,9 @@ def get_json(img_list):
         img_sent = json.load(f)
     img_sent = img_sent['images']
     arr = []
-    for i in len(img_list):
+    for i in range(len(img_list)):
         for j in img_sent:
-            if j['filename'] == i:
+            if j['filename'] == img_list[i]:
                 arr.append(j)
 
     return arr
@@ -56,28 +56,23 @@ def encode_image(image_path):
 
 def make_jsonl(img_list, test_list):
     data = []
-    len = min(img_list, test_list)
-    for i in range(len):
+    leng = min(len(img_list), len(test_list))
+    for i in range(leng):
         userdict = {}
         userdict['role'] = 'user'
         userdict['content'] = "이 사진에 대해 캡션을 달아줘"
-        userdict['image'] = encode_image("./RSICD/RSICD_images" + img_list[i])
-
+        userdict['image'] = encode_image("./RSICD/RSICD_images/" + img_list[i])
         assidict = {}
         assidict['role'] = "assistant"
-        assidict['content'] = test_list[i]['sentences'][0]['raw']
-
+        assidict['content'] = translate(test_list[i]['sentences'][3]['raw'])
         systdict = {}
         systdict['role'] = "system"
         systdict['content'] = system_prompt
-
         tmplist = [systdict, userdict, assidict]
-
         tmpdict = {}
         tmpdict['messages'] = tmplist
-
-        data.append(tmplist)
-
+        print("진행상황: ", i, " / ", leng)
+        data.append(tmpdict)
     with open('tunedata.jsonl', 'w', encoding='utf-8') as f:
         for item in data:
             json.dump(item, f, ensure_ascii=False)
@@ -94,10 +89,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='gpt-4o-mini-2024-07-18')
     parser.add_argument('--dataset', type=str, default='RSICD')
+    parser.add_argument('--is_skip', type=str, default='True')
     args = parser.parse_args()
     model = args.model
     dataset = args.dataset
+    is_skip = args.is_skip
 
-    img_list, img_else = get_list(dataset)
-    test_list = get_json(img_list)
-    make_jsonl(img_list, test_list)
+    if is_skip == 'False':
+        img_list, img_else = get_list(dataset)
+        test_list = get_json(img_list)
+        make_jsonl(img_list, test_list)
+    
+    else:
+        pass
