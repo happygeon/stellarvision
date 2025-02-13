@@ -60,14 +60,18 @@ def make_jsonl(img_list, test_list):
     for i in range(leng):
         userdict = {}
         userdict['role'] = 'user'
-        userdict['content'] = "이 사진에 대해 캡션을 달아줘"
-        userdict['image'] = encode_image("./RSICD/RSICD_images/" + img_list[i])
+        userdict_content = "이 사진에 대해 캡션을 달아줘"
+        userdict_image = encode_image("./RSICD/RSICD_images/" + img_list[i])
+        userdict['content'] = [{"type": "text", "text": userdict_content}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{userdict_image}"}}]
+
         assidict = {}
         assidict['role'] = "assistant"
-        assidict['content'] = translate(test_list[i]['sentences'][3]['raw'])
+        assidict['content'] = [{"type": "text", "text": translate(test_list[i]['sentences'][3]['raw'])}]
+        
         systdict = {}
         systdict['role'] = "system"
-        systdict['content'] = system_prompt
+        systdict['content'] = [{"type": "text", "text": system_prompt}]
+
         tmplist = [systdict, userdict, assidict]
         tmpdict = {}
         tmpdict['messages'] = tmplist
