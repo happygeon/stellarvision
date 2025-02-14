@@ -4,8 +4,10 @@ import PIL.Image
 import json
 import requests
 
+# Base prompt for metadata
 base_prompt = "메타데이터는 다음과 같습니다:"
 
+# Function to load images
 def img_gen(len, path):
     """
     # 이미지 파일 열기 
@@ -18,6 +20,7 @@ def img_gen(len, path):
         img.append(resize_image(img_tmp))
     return img
 
+# Class for the chat model
 class ChatModel:
     def __init__(self):
         # vision 모델 지정
@@ -40,18 +43,21 @@ class ChatModel:
                                                     """
                               )
 
+    # Start a chat session
     def start_chat(self, history):
         self.chat = self.model.start_chat(history=history)
         return self.chat
 
+    # Send a message with an image
     def send_message(self, message, img, img_path):
-        #if img is path
+        # If img is a path
         if isinstance(img, str):
             img = PIL.Image.open(img)
         f = genai.upload_file(img_path)
         self.response = self.chat.send_message([f, message])
         return self.response.text
 
+# Function to generate chat history
 def history_gen(img, prompt, len, metadata=None):
     history = []
     for i in range(len):
@@ -72,6 +78,7 @@ def history_gen(img, prompt, len, metadata=None):
         history.append({"role": "model", "parts": prompt[i]['answer']})
     return history
 
+# Function to resize an image
 def resize_image(img, max_size = 3000):
     # 현재 이미지의 크기
     width, height = img.size
@@ -91,16 +98,15 @@ def resize_image(img, max_size = 3000):
         # 이미지 리사이즈
         img = img.resize((new_width, new_height), PIL.Image.Resampling.LANCZOS)
         
-
     return img
 
+# Function to preprocess metadata
 def metadata_preprocess(metadata):
     with open('./env/key.json') as f:
         auth_key = json.load(f)
         opencage_key = auth_key['opencage']
     
-    
-    #2x4
+    # Calculate the center of the coordinates
     lonlat = metadata['geometry']['coordinates'][0]
     lon, lat = 0, 0
     for i in range(4):
@@ -109,6 +115,7 @@ def metadata_preprocess(metadata):
     lon /= 4
     lat /= 4
 
+    # Get location information from OpenCage API
     url = "https://api.opencagedata.com/geocode/v1/json"
     params = {
         "q": f"{lat},{lon}",
@@ -129,10 +136,9 @@ def metadata_preprocess(metadata):
     metadata['country'] = country
     return metadata
 
-#if main
+# Main function
 if __name__ == "__main__":
-    #arg parse
-    #get image len and path
+    # Parse arguments
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--len', type=int, default=2)
@@ -143,12 +149,12 @@ if __name__ == "__main__":
     path = args.path
     metadata = args.metadata
 
-    #api key setting
+    # Set API key
     with open('./env/key.json') as f:
         auth_key = json.load(f)
         genai.configure(api_key=auth_key['gemini'])
 
-    #get image and prompt
+    # Get images and prompt
     img = img_gen(len, path)
     with open('./dataset/prompt.json', 'r', encoding='utf-8') as f:
         prompt = json.load(f)
@@ -159,17 +165,17 @@ if __name__ == "__main__":
             print("prompt should be list type")
             exit()
 
-
+    # Start chat session
     chat = ChatModel()
     chat.start_chat(history=history_gen(img, prompt, len, metadata))
 
-    #get input message
+    # Get input message
     input_message = input("Qustion: ")
     input_img = input("Image path(if no, say q): ")
     if input_img == 'q':
         input_img = './dataset/example.png'
 
-    #get metadata
+    # Get metadata
     try:
         with open(input_img[:-3] + 'json', 'r', encoding='utf-8') as f:
             meta_json = json.load(f)
@@ -183,8 +189,6 @@ if __name__ == "__main__":
     input_img_path = input_img
     input_img = resize_image(PIL.Image.open(input_img))
 
+    # Send message and print response
     response = chat.send_message(input_message, input_img, input_img_path)
-    #response = chat.send_message([img5, "여기에 비행기가 얼마나 보여?"])
-    #response = chat.send_message([img6, "좌측 하단에 있는 저건 뭐야?"])    
     print(response)
-    

@@ -9,8 +9,11 @@ import deepl
 from konlpy.tag import Komoran
 import openai
 import base64
+
+# Initialize Komoran for Korean morphological analysis
 komoran = Komoran()
 
+# Function to get RSICD image list based on the 'only_port' flag
 def get_rsicd(only_port):
     if(only_port):
         with open('./RSICD/txtclasses_rsicd/Port.txt') as f:
@@ -26,6 +29,7 @@ def get_rsicd(only_port):
     
     return img_list
 
+# Function to get JSON data for the given image list
 def get_json(img_list):
     with open('./RSICD/dataset_rsicd.json', "r", encoding="utf-8") as f:
         img_sent = json.load(f)
@@ -36,6 +40,7 @@ def get_json(img_list):
             arr.append(i)
     return arr
 
+# Function to translate a string to Korean using DeepL API
 def translate(string):
     with open('./env/key.json') as f:
         auth_key = json.load(f)
@@ -43,10 +48,12 @@ def translate(string):
     result = translator.translate_text(string, target_lang="KO")
     return result.text
 
+# Function to preprocess a sentence using Komoran
 def preprocess(sentence):
     # 문장이 리스트가 아닌, 문자열로 처리되도록 해야 한다.
     return komoran.morphs(sentence)
 
+# Function to test Gemini model with few-shot learning
 def test_gemini_fewshot(dataset, shot):
     res = {}
     gts = {}
@@ -65,7 +72,7 @@ def test_gemini_fewshot(dataset, shot):
             auth_key = json.load(f)
             genai.configure(api_key=auth_key['gemini'])
 
-        #get image and prompt
+        # Get image and prompt
         img = gemini_prompt.img_gen(len, path)
         with open('./dataset/prompt.json', 'r', encoding='utf-8') as f:
             prompt = json.load(f)
@@ -76,11 +83,10 @@ def test_gemini_fewshot(dataset, shot):
                 print("prompt should be list type")
                 exit()
 
-
         chat = gemini_prompt.ChatModel()
         chat.start_chat(history=gemini_prompt.history_gen(img, prompt, len, metadata))
 
-        #get input message
+        # Get input message
         input_message = "이 사진에 대해 캡션을 달아줘"
         input_img = './RSICD/RSICD_images/' + file_name
         
@@ -92,7 +98,6 @@ def test_gemini_fewshot(dataset, shot):
         print("예시: ", gts[file_name][0])
         res[file_name] = [response]
 
-
     gts = {key: [preprocess(caption) for caption in value] for key, value in gts.items()}
     res = {key: [preprocess(caption) for caption in value] for key, value in res.items()}
     gts = {k: [" ".join(sent) for sent in v] for k, v in gts.items()}
@@ -103,6 +108,7 @@ def test_gemini_fewshot(dataset, shot):
     print(x)
     return score
 
+# Function to test GPT model with few-shot learning
 def test_gpt_fewshot(dataset, shot, fine_tune=False):
     res = {}
     gts = {}
@@ -122,7 +128,7 @@ def test_gpt_fewshot(dataset, shot, fine_tune=False):
             auth_key = json.load(f)
             openai.api_key = auth_key['gpt']
 
-        #get image and prompt
+        # Get image and prompt
         img = gemini_prompt.img_gen(len, path)
         img = gpt_prompt.img_64(img)
         with open('./dataset/prompt.json', 'r', encoding='utf-8') as f:
@@ -139,9 +145,7 @@ def test_gpt_fewshot(dataset, shot, fine_tune=False):
         else:
             chat = gpt_prompt.ChatModel()
         
-        #chat.start_chat(history=gemini_prompt.history_gen(img, prompt, len, metadata))
-
-        #get input message
+        # Get input message
         input_message = "이 사진에 대해 캡션을 달아줘"
         input_img = './RSICD/RSICD_images/' + file_name
         
@@ -158,7 +162,6 @@ def test_gpt_fewshot(dataset, shot, fine_tune=False):
         print("예시: ", gts[file_name][0])
         res[file_name] = [response]
 
-
     gts = {key: [preprocess(caption) for caption in value] for key, value in gts.items()}
     res = {key: [preprocess(caption) for caption in value] for key, value in res.items()}
     gts = {k: [" ".join(sent) for sent in v] for k, v in gts.items()}
@@ -170,7 +173,7 @@ def test_gpt_fewshot(dataset, shot, fine_tune=False):
     return score
 
 if __name__ == "__main__":
-    #get model, type, and rsicd set
+    # Get model, type, and RSICD set
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='gemini')

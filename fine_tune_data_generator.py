@@ -4,6 +4,7 @@ import json
 import os
 import deepl
 
+# System prompt for the model to follow when performing tasks
 system_prompt = """위성사진과 요청사항을 입력으로 제공하면 모델이 다양한 작업을 수행해야 합니다.
                                                     예를 들어:
 
@@ -19,6 +20,7 @@ system_prompt = """위성사진과 요청사항을 입력으로 제공하면 모
                                                     기존의 대화를 참고하여 비슷한 양식으로 결과를 출력하세요.
                                                     또한, 경우에 따라 메타데이터가 json형식으로 주어질 수 있습니다. 상황에 맞게 이를 활용하여 대답을 해주세요."""
 
+# Function to translate a string to Korean using DeepL API
 def translate(string):
     with open('./env/key.json') as f:
         auth_key = json.load(f)
@@ -26,6 +28,7 @@ def translate(string):
     result = translator.translate_text(string, target_lang="KO")
     return result.text
 
+# Function to get the list of images and other data from the dataset
 def get_list(dataset):
     img_list = []
     img_else = []
@@ -38,6 +41,7 @@ def get_list(dataset):
             img_else.extend(ttmp)
     return img_list, img_else
 
+# Function to get JSON data for the images
 def get_json(img_list):
     with open('./RSICD/dataset_rsicd.json', "r", encoding="utf-8") as f:
         img_sent = json.load(f)
@@ -50,10 +54,12 @@ def get_json(img_list):
 
     return arr
 
+# Function to encode an image to base64
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
+# Function to create a JSONL file from the image list and test list
 def make_jsonl(img_list, test_list):
     data = []
     leng = min(len(img_list), len(test_list))
@@ -82,8 +88,7 @@ def make_jsonl(img_list, test_list):
             json.dump(item, f, ensure_ascii=False)
             f.write('\n')
 
-
-
+# Main function to parse arguments and execute the script
 if __name__ == "__main__":
     with open('./env/key.json') as f:
         auth_key = json.load(f)
