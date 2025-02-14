@@ -21,7 +21,16 @@ system_prompt = """위성사진과 요청사항을 입력으로 제공하면 모
                                                     또한, 경우에 따라 메타데이터가 json형식으로 주어질 수 있습니다. 상황에 맞게 이를 활용하여 대답을 해주세요."""
 
 # Function to translate a string to Korean using DeepL API
-def translate(string):
+def translate(string: str) -> str:
+    """
+    Translate a given string to Korean using the DeepL API.
+
+    Args:
+        string (str): The string to be translated.
+
+    Returns:
+        str: The translated string in Korean.
+    """
     with open('./env/key.json') as f:
         auth_key = json.load(f)
         translator = deepl.Translator(auth_key['deepl'])
@@ -29,7 +38,16 @@ def translate(string):
     return result.text
 
 # Function to get the list of images and other data from the dataset
-def get_list(dataset):
+def get_list(dataset: str) -> tuple[list[str], list[str]]:
+    """
+    Get the list of images and other data from the dataset.
+
+    Args:
+        dataset (str): The name of the dataset.
+
+    Returns:
+        tuple[list[str], list[str]]: A tuple containing two lists - one with image filenames and one with other data.
+    """
     img_list = []
     img_else = []
     for file in os.listdir('./RSICD/txtclasses_rsicd'):
@@ -42,7 +60,16 @@ def get_list(dataset):
     return img_list, img_else
 
 # Function to get JSON data for the images
-def get_json(img_list):
+def get_json(img_list: list[str]) -> list[dict]:
+    """
+    Get JSON data for the images.
+
+    Args:
+        img_list (list[str]): A list of image filenames.
+
+    Returns:
+        list[dict]: A list of dictionaries containing image metadata.
+    """
     with open('./RSICD/dataset_rsicd.json', "r", encoding="utf-8") as f:
         img_sent = json.load(f)
     img_sent = img_sent['images']
@@ -55,12 +82,28 @@ def get_json(img_list):
     return arr
 
 # Function to encode an image to base64
-def encode_image(image_path):
+def encode_image(image_path: str) -> str:
+    """
+    Encode an image to a base64 string.
+
+    Args:
+        image_path (str): The path to the image file.
+
+    Returns:
+        str: The base64 encoded string of the image.
+    """
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 # Function to create a JSONL file from the image list and test list
-def make_jsonl(img_list, test_list):
+def make_jsonl(img_list: list[str], test_list: list[dict]) -> None:
+    """
+    Create a JSONL file from the image list and test list.
+
+    Args:
+        img_list (list[str]): A list of image filenames.
+        test_list (list[dict]): A list of dictionaries containing test data.
+    """
     data = []
     leng = min(len(img_list), len(test_list))
     for i in range(leng):

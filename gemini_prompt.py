@@ -3,16 +3,19 @@ import os
 import PIL.Image
 import json
 import requests
+from typing import List, Dict, Any, Optional
 
 # Base prompt for metadata
 base_prompt = "메타데이터는 다음과 같습니다:"
 
 # Function to load images
-def img_gen(len, path):
+def img_gen(len: int, path: str) -> List[PIL.Image.Image]:
     """
-    # 이미지 파일 열기 
-    # 최대 3072x3072 px
-    # 최소 768x768 px  
+    Load and resize images from the specified path.
+
+    :param len: The number of images to load.
+    :param path: The path to the images.
+    :return: A list of resized images.
     """
     img = []
     for i in range(len):
@@ -23,7 +26,9 @@ def img_gen(len, path):
 # Class for the chat model
 class ChatModel:
     def __init__(self):
-        # vision 모델 지정
+        """
+        Initialize the ChatModel with a specific vision model.
+        """
         self.model = genai.GenerativeModel(model_name="models/gemini-2.0-flash-exp",
                               generation_config={"temperature": 0.4},
                               system_instruction="""위성사진과 요청사항을 입력으로 제공하면 모델이 다양한 작업을 수행해야 합니다.
@@ -44,13 +49,26 @@ class ChatModel:
                               )
 
     # Start a chat session
-    def start_chat(self, history):
+    def start_chat(self, history: List[Dict[str, Any]]) -> genai.ChatSession:
+        """
+        Start a chat session with the given history.
+
+        :param history: The chat history as a list of dictionaries.
+        :return: The chat session object.
+        """
         self.chat = self.model.start_chat(history=history)
         return self.chat
 
     # Send a message with an image
-    def send_message(self, message, img, img_path):
-        # If img is a path
+    def send_message(self, message: str, img: Any, img_path: str) -> str:
+        """
+        Send a message with an image to the chat model.
+
+        :param message: The input message as a string.
+        :param img: The input image, either as a path or a PIL image.
+        :param img_path: The path to the input image.
+        :return: The response from the model as a string.
+        """
         if isinstance(img, str):
             img = PIL.Image.open(img)
         f = genai.upload_file(img_path)
@@ -58,7 +76,16 @@ class ChatModel:
         return self.response.text
 
 # Function to generate chat history
-def history_gen(img, prompt, len, metadata=None):
+def history_gen(img: List[PIL.Image.Image], prompt: List[Dict[str, Any]], len: int, metadata: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Generate chat history from images and prompts.
+
+    :param img: A list of images.
+    :param prompt: A list of dictionaries containing questions and answers.
+    :param len: The length of the prompt list.
+    :param metadata: Optional metadata to include in the prompts.
+    :return: The generated chat history as a list of dictionaries.
+    """
     history = []
     for i in range(len):
         if(metadata is not None):
@@ -79,7 +106,14 @@ def history_gen(img, prompt, len, metadata=None):
     return history
 
 # Function to resize an image
-def resize_image(img, max_size = 3000):
+def resize_image(img: PIL.Image.Image, max_size: int = 3000) -> PIL.Image.Image:
+    """
+    Resize an image to a maximum size while maintaining aspect ratio.
+
+    :param img: The input image.
+    :param max_size: The maximum size for the longest dimension.
+    :return: The resized image.
+    """
     # 현재 이미지의 크기
     width, height = img.size
 
@@ -101,7 +135,13 @@ def resize_image(img, max_size = 3000):
     return img
 
 # Function to preprocess metadata
-def metadata_preprocess(metadata):
+def metadata_preprocess(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Preprocess metadata to include city and country information.
+
+    :param metadata: The input metadata as a dictionary.
+    :return: The preprocessed metadata with city and country information.
+    """
     with open('./env/key.json') as f:
         auth_key = json.load(f)
         opencage_key = auth_key['opencage']

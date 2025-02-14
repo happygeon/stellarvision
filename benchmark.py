@@ -9,12 +9,22 @@ import deepl
 from konlpy.tag import Komoran
 import openai
 import base64
+from typing import List, Dict, Any
 
 # Initialize Komoran for Korean morphological analysis
 komoran = Komoran()
 
 # Function to get RSICD image list based on the 'only_port' flag
-def get_rsicd(only_port):
+def get_rsicd(only_port: bool) -> List[str]:
+    """
+    Get RSICD image list based on the 'only_port' flag.
+
+    Args:
+        only_port (bool): Flag to determine if only port images should be included.
+
+    Returns:
+        List[str]: List of image filenames.
+    """
     if(only_port):
         with open('./RSICD/txtclasses_rsicd/Port.txt') as f:
             img_list = f.readlines()
@@ -30,7 +40,16 @@ def get_rsicd(only_port):
     return img_list
 
 # Function to get JSON data for the given image list
-def get_json(img_list):
+def get_json(img_list: List[str]) -> List[Dict[str, Any]]:
+    """
+    Get JSON data for the given image list.
+
+    Args:
+        img_list (List[str]): List of image filenames.
+
+    Returns:
+        List[Dict[str, Any]]: List of image data dictionaries.
+    """
     with open('./RSICD/dataset_rsicd.json', "r", encoding="utf-8") as f:
         img_sent = json.load(f)
     img_sent = img_sent['images']
@@ -41,7 +60,16 @@ def get_json(img_list):
     return arr
 
 # Function to translate a string to Korean using DeepL API
-def translate(string):
+def translate(string: str) -> str:
+    """
+    Translate a string to Korean using DeepL API.
+
+    Args:
+        string (str): The string to be translated.
+
+    Returns:
+        str: Translated string in Korean.
+    """
     with open('./env/key.json') as f:
         auth_key = json.load(f)
         translator = deepl.Translator(auth_key['deepl'])
@@ -49,12 +77,31 @@ def translate(string):
     return result.text
 
 # Function to preprocess a sentence using Komoran
-def preprocess(sentence):
+def preprocess(sentence: str) -> List[str]:
+    """
+    Preprocess a sentence using Komoran.
+
+    Args:
+        sentence (str): The sentence to be preprocessed.
+
+    Returns:
+        List[str]: List of morphological tokens.
+    """
     # 문장이 리스트가 아닌, 문자열로 처리되도록 해야 한다.
     return komoran.morphs(sentence)
 
 # Function to test Gemini model with few-shot learning
-def test_gemini_fewshot(dataset, shot):
+def test_gemini_fewshot(dataset: List[Dict[str, Any]], shot: int) -> float:
+    """
+    Test Gemini model with few-shot learning.
+
+    Args:
+        dataset (List[Dict[str, Any]]): The dataset to be used for testing.
+        shot (int): The number of shots for few-shot learning.
+
+    Returns:
+        float: The Cider score.
+    """
     res = {}
     gts = {}
     for data in dataset[:10]:
@@ -109,7 +156,18 @@ def test_gemini_fewshot(dataset, shot):
     return score
 
 # Function to test GPT model with few-shot learning
-def test_gpt_fewshot(dataset, shot, fine_tune=False):
+def test_gpt_fewshot(dataset: List[Dict[str, Any]], shot: int, fine_tune: bool = False) -> float:
+    """
+    Test GPT model with few-shot learning.
+
+    Args:
+        dataset (List[Dict[str, Any]]): The dataset to be used for testing.
+        shot (int): The number of shots for few-shot learning.
+        fine_tune (bool): Flag to determine if fine-tuning should be used.
+
+    Returns:
+        float: The Cider score.
+    """
     res = {}
     gts = {}
     for data in dataset[:10]:

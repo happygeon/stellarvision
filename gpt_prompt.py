@@ -1,11 +1,18 @@
 import openai
 import base64
+from typing import List, Dict, Any
 
 # Class for the chat model
 class ChatModel:
-    def __init__(self, model = "gpt-4o-mini", temperature = 0.4):
+    def __init__(self, model: str = "gpt-4o-mini", temperature: float = 0.4):
+        """
+        Initialize the ChatModel with a specific model and temperature.
+
+        :param model: The name of the model to use.
+        :param temperature: The temperature setting for the model.
+        """
         self.model_name = model
-        self.temperature = 0.4
+        self.temperature = temperature
         self.messages = [{"role": "system", "content": """위성사진과 요청사항을 입력으로 제공하면 모델이 다양한 작업을 수행해야 합니다.
                                                     예를 들어:
 
@@ -19,17 +26,20 @@ class ChatModel:
                                                     이미지나 사진과 같은 단어는 지양하세요.
                                                     선착장 대신 항구, 배 대신 보트라는 단어를 사용하세요.
                                                     기존의 대화를 참고하여 비슷한 양식으로 결과를 출력하세요.
-                                                    또한, 경우에 따라 메타데이터가 json형식으로 주어질 수 있습니다. 상황에 맞게 이를 활용하여 대답을 해주세요."""}]
+                                                    또한, 경우에 따라 메타데이터가 json형식으로 주어질 수 있습니다. 상황에 맞게 이를 활용하여 대답을 해주세요."""}]  
 
-    # Function to send a message with an image
-    def send_message(self, input_message, input_img, input_img_path, img, prompt, len):
-        # print("input msg: ", input_message)
-        # print("input img: ", input_img)
-        # print("input img path: ", input_img_path)
-        # print("img: ", img[0][:30])
-        # print("prompt: ", prompt)
-        # print("len: ", len)
+    def send_message(self, input_message: str, input_img: str, input_img_path: str, img: List[Any], prompt: List[Dict[str, Any]], len: int) -> str:
+        """
+        Send a message with an image to the chat model.
 
+        :param input_message: The input message as a string.
+        :param input_img: The input image in base64 format.
+        :param input_img_path: The path to the input image.
+        :param img: A list of images to be processed.
+        :param prompt: A list of dictionaries containing questions and answers.
+        :param len: The length of the prompt list.
+        :return: The response from the model as a string.
+        """
         for i in range(len):
             conv = prompt[i]
             image = img[i]
@@ -43,7 +53,7 @@ class ChatModel:
             prompt_user['role'] = 'user'
             prompt_user['content'] = []
             prompt_user['content'].append({"type": "text", "text": ques})
-            prompt_user['content'].append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image}"} })
+            prompt_user['content'].append({"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image}"}})
 
             prompt_assi['role'] = 'assistant'
             prompt_assi['content'] = ans
@@ -59,14 +69,20 @@ class ChatModel:
 
         # Create a chat completion with the model
         self.model = openai.chat.completions.create(
-            model = self.model_name,
-            messages = self.messages,
-            temperature = self.temperature
-            )
+            model=self.model_name,
+            messages=self.messages,
+            temperature=self.temperature
+        )
         return self.model.choices[0].message.content
 
 # Function to convert images to base64
-def img_64(img):
+def img_64(img: List[Any]) -> List[str]:
+    """
+    Convert a list of images to base64 format.
+
+    :param img: A list of images.
+    :return: A list of base64 encoded strings.
+    """
     from io import BytesIO
     for i in range(len(img)):
         with BytesIO() as buffer:
